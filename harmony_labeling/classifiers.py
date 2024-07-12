@@ -3,8 +3,8 @@ import pandas as pd
 from catboost import CatBoostClassifier
 from IPython.display import display
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
+# from sklearn.ensemble import RandomForestClassifier
+# from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, FunctionTransformer
 
 

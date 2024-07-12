@@ -61,7 +61,7 @@ def label_json2file_label(json_path, dst_dir):
         save_txt_file(os.path.join(cur_comp_dir, 'pred_label.lab'), pred_label_str)
         
         
-        score = result_label[comp_id]['score']
+        score = result_labels[comp_id]['score']
         save_txt_file(os.path.join(cur_comp_dir, 'score.lab'), f'{score=}')
         
 

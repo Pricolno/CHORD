@@ -7,7 +7,7 @@ from classifiers import BaseClassifier
 
 from collections import Counter
 
-from metrics import calculate_bach_metrics
+from metrics import calculate_bach_metrics, calculate_WSCR
 
 keys_tokenizer = {
     'C': 0, 
@@ -35,6 +35,7 @@ GPU_SETTINGS = {
 
 best_params_roots = {
     'n_estimators': 685,
+    # 'n_estimators': 10,
     'learning_rate': 0.07557142211700456,
     'depth': 7,
     'l2_leaf_reg': 62.37934704452352,
@@ -49,6 +50,7 @@ best_params_roots = {
 
 best_params_mode = {
     'n_estimators': 290,
+    # 'n_estimators': 10,
     'learning_rate': 0.04774974078860072,
     'depth': 10,
     'l2_leaf_reg': 0.10285856054142818,
@@ -274,15 +276,20 @@ class BaseDataset:
         train_data.loc[:, 'root'] = train_data.loc[:, 'root'].apply(lambda x: keys_tokenizer[x]).to_numpy()
         train_data.loc[:, 'mode'] = train_data.loc[:, 'mode'].apply(lambda x: 1 if x == 'M' else 0).to_numpy()
         
+        # print(f'{train_data=}')
         self.harmony_classifier.train(train_data)
         
         test_data = test_data.copy()
         test_data.loc[:, 'root'] = test_data.loc[:, 'root'].apply(lambda x: keys_tokenizer[x]).to_numpy()
         test_data.loc[:, 'mode'] = test_data.loc[:, 'mode'].apply(lambda x: 1 if x == 'M' else 0).to_numpy()
 
+        # print(f'{test_data=}')
         root_pred, mode_pred = self.harmony_classifier.pred(
             test_data
         )
+        
+        # print(len(root_pred))
+        # print(root_pred)
         
         # print(f'{root_pred.shape=}')
         # root_pred = root_pred.squeeze(-1)
@@ -307,6 +314,17 @@ class BaseDataset:
         # 0.8315565031982942
         # 0.8400852878464818
         
+        wscr = calculate_WSCR(
+            # predicted_trackId_root_mode_list,
+            [(track_id, r, m) for track_id, r, m in zip(test_data['choral_ID'].to_numpy(), root_pred, mode_pred)], 
+            # gt_trackId_root_mode_list
+            [(track_id, r, m) for track_id, r, m in zip(test_data['choral_ID'].to_numpy(), test_data['root'].to_numpy(), test_data['mode'].to_numpy())],
+        )
+        print(f'{wscr=}')
+        
+        
+        
+        
         # --- Calculate BaCh metrics ---
         full_chord_metrics = calculate_bach_metrics(
             # Combine root and mode predictions into a single list
@@ -314,6 +332,7 @@ class BaseDataset:
             [(r, m) for r, m in zip(test_data['root'].to_numpy(), test_data['mode'].to_numpy())],
             evaluation_type="full_chord"
         )
+        
 
         root_only_metrics = calculate_bach_metrics(
             root_pred,
